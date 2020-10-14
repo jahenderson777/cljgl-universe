@@ -1,0 +1,33 @@
+{:deps
+ {org.clojure/clojure {:mvn/version "1.10.1"}
+  generateme/fastmath {:mvn/version "1.5.2"}
+  clojure2d {:mvn/version "1.3.0"}
+;   org.lwjgl/lwjgl {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-glfw {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-opengl {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-stb {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl$natives-linux {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-glfw$natives-linux {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-opengl$natives-linux {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-stb$natives-linux {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl$natives-macos {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-glfw$natives-macos {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-opengl$natives-macos {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-stb$natives-macos {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl$natives-windows {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-glfw$natives-windows {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-opengl$natives-windows {:mvn/version "3.2.3"}
+;   org.lwjgl/lwjgl-stb$natives-windows {:mvn/version "3.2.3"}
+  }
+ 
+ :aliases {;:macos {:jvm-opts ["-XstartOnFirstThread" "-Djava.awt.headless=true"]}
+           :dev {:extra-deps {badigeon
+                              {:git/url "https://github.com/EwenG/badigeon.git"
+                               :sha "1edf7ae465db870ec0066f28226edb9b04873b70"
+                               :tag "0.0.11"}
+                              org.clojure/tools.namespace {:mvn/version "1.0.0"}
+                              }
+                 ;:main-opts ["dev.clj"]
+                 }}
+ 
+ :paths ["src" "classes"]}
