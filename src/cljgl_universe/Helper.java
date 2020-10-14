@@ -2,6 +2,7 @@ package cljgl_universe;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.ArrayList;
 
 public class Helper {
     public int[] lightIndex4;
@@ -120,6 +121,41 @@ public class Helper {
 
     public void switchBuffers() {
         bufferSwitch = !bufferSwitch;
+    }
+
+    public int lowerBound(int x, int divisor) {
+        int x2, m, z;
+        x2 = x - (divisor / 2);
+        m = x2 % divisor;
+        z = x2 / divisor;
+        
+        if (m < divisor / 4) {
+            return z - 1;
+        } else {
+            return z;
+        }
+    }
+
+    public int higherBound(int x, int divisor) {
+        int x2, m, z;
+        x2 = x + (divisor / 2);
+        m = x2 % divisor;
+        z = 1 + (x2 / divisor);
+
+       if (m >= 3 * divisor / 4) {
+            return z + 1;
+        } else {
+            return z;
+        }
+    }
+
+    public ArrayList<Integer> bounds(int x) {
+        ArrayList<Integer> ret = new ArrayList<Integer>();
+        for (int divisor = 4; divisor < 512; divisor *= 4) {
+            ret.add(lowerBound(x, divisor));
+            ret.add(higherBound(x, divisor));
+        }
+        return ret;
     }
 
     public void calcLightPoints() {

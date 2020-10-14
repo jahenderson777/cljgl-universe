@@ -9,7 +9,7 @@
 
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* :warn-on-boxed)
-(m/use-primitive-operators)
+;(m/use-primitive-operators)
 
 (def size 1024)
 (def num-light-points 4500)
@@ -18,6 +18,8 @@
 (.randomizeLightPoints h)
 (.randomizeDarkPoints h)
 (.indexPoints h)
+
+(def p (atom [512 512]))
 
 (defn draw-grid [canvas]
   (loop [l 16]
@@ -30,6 +32,22 @@
           (d/line canvas 0 x 1024 x)
           (recur (- x l))))
       (recur (* 4 l)))))
+
+(defn draw-test-bounds [canvas]
+  (d/set-color canvas :red)
+  (d/set-stroke canvas 1.0)
+  (let [[px py] @p
+        x-bounds (partition 2 (.bounds h px))
+        y-bounds (partition 2 (.bounds h py))]
+    (doall
+     (map (fn [[x-start x-end] [y-start y-end] d]
+            (d/rect canvas
+                  (* d x-start)
+                  (* d y-start)
+                  (- (* d x-end) (* d x-start))
+                  (- (* d y-end) (* d y-start))
+                  true))
+          x-bounds y-bounds (iterate #(* 4 %) 4)))))
 
 (defn draw-points [canvas]
   (.calcLightPoints h)
@@ -48,11 +66,12 @@
 
 (comment
   (let [draw (fn [canvas window frame state]
-               #_(when (clojure2d.core/mouse-pressed? window)
+               (when (clojure2d.core/mouse-pressed? window)
                    (reset! p [(d/mouse-x window) (d/mouse-y window)]))
                (d/set-background canvas 120 120 120 60)
-               ;(draw-grid canvas)
-               (draw-points canvas)
+               (draw-grid canvas)
+               (draw-test-bounds canvas)
+               ;(draw-points canvas)
                
                )]
     (d/show-window {:canvas (d/canvas size size)
