@@ -14,6 +14,7 @@ public class UniverseEngine {
 
     public float[] lightPointsXA, darkPointsXA, lightPointsYA, darkPointsYA;
     public float[] lightPointsXB, darkPointsXB, lightPointsYB, darkPointsYB;
+    public float[] lightPointsForce;
 
     boolean bufferSwitch = true;
 
@@ -34,6 +35,8 @@ public class UniverseEngine {
         this.lightPointsYB = new float[numLightPoints * 2];
         this.darkPointsXB = new float[numDarkPoints * 2];
         this.darkPointsYB = new float[numDarkPoints * 2];
+
+        this.lightPointsForce = new float[numLightPoints];
 
         index64Width = size / 64;
         index64Size = (size/64) * (size/64);
@@ -103,6 +106,8 @@ public class UniverseEngine {
         }
         Arrays.fill(lightIndex64, 0);
         Arrays.fill(darkIndex64, 0);
+
+        Arrays.fill(lightPointsForce, 0.0f);
 
         for (int i = 0; i < numLightPoints; i++) {
             int i64 = ((int)lightPointsX[i] / 64) + (((int)lightPointsY[i] / 64) * index64Width);
@@ -178,7 +183,7 @@ public class UniverseEngine {
         float[] lightPointsXWrite = bufferSwitch ? lightPointsXB : lightPointsXA;
         float[] lightPointsYWrite = bufferSwitch ? lightPointsYB : lightPointsYA;
 
-        float x, y, dx = 0.0f, dy = 0.0f, h, h3, ex, ey, thetaMod = 0.0f;
+        float x, y, dx = 0.0f, dy = 0.0f, h, h3, ex, ey, thetaMod = 0.0f, forceTotal;
         int i, jx, jy, ix, iy, lbx, lby, hbx, hby, pidx, v;
 
         for (i = 0; i < numLightPoints; i++) {
@@ -193,6 +198,8 @@ public class UniverseEngine {
             hbx = higherBound(ix, 64);
             lby = lowerBound(iy, 64);
             hby = higherBound(iy, 64);
+            thetaMod = 0.0f;
+            forceTotal = 0.0f;
 
             for (jy = 0; jy < size/64; jy++) {
                 for (jx = 0; jx < size/64; jx++) {
@@ -214,10 +221,8 @@ public class UniverseEngine {
                                 if (h < 1.0f) h = 1.0f;
                                 h3 = 1.0f / (h * h * h);
                                 thetaMod += h3 /  100.0f;
-                                if (h < 5.0f) {                                    
-                                    //ex += 1.0f * dx * h3;
-                                    //ey += 1.0f * dy * h3;
-                                } else {
+                                forceTotal += 0.25f / (h * h);
+                                if (h >= 5.0f) { 
                                     ex += 20.0f * dx * h3;
                                     ey += 20.0f * dy * h3;
                                 }
@@ -227,9 +232,11 @@ public class UniverseEngine {
                 }
             }
 
+            lightPointsForce[i] = 500.0f * forceTotal / (1.0f + Math.abs(0.01f * forceTotal));;
+
             float theta = (float)Math.atan2(ey, ex);
             float h2 = (float)Math.sqrt(ex*ex + ey*ey);
-            thetaMod = 2.0f * thetaMod / (1.0f + Math.abs(thetaMod));
+            thetaMod = 12.0f * thetaMod / (1.0f + Math.abs(4.0f * thetaMod));
             h2 = 4.0f * h2 / (1.0f + Math.abs(h2));
 
             theta += thetaMod;
@@ -365,6 +372,51 @@ public class UniverseEngine {
             darkPointsYWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, ey));
         }
     }    
+
+    private static float hue2rgb(float p, float q, float h) {
+        if (h < 0) {
+            h += 1;
+        }
+    
+        if (h > 1) {
+            h -= 1;
+        }
+    
+        if (6 * h < 1) {
+            return p + ((q - p) * 6 * h);
+        }
+    
+        if (2 * h < 1) {
+            return q;
+        }
+    
+        if (3 * h < 2) {
+            return p + ((q - p) * 6 * ((2.0f / 3.0f) - h));
+        }
+    
+        return p;
+    }
+
+    static public int[] hslColor(float h, float s, float l) {
+        float q, p, r, g, b;
+        int[] color = new int[3];
+        
+        if (s == 0) {
+            r = g = b = l; // achromatic
+        } else {
+            q = l < 0.5 ? (l * (1 + s)) : (l + s - l * s);
+            p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1.0f / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1.0f / 3);
+        }
+        color[0] = Math.round(r * 255);
+        color[1] = Math.round(g * 255);
+        color[2] = Math.round(b * 255);
+        return color;
+    }
+
+
 
 
     public static void main(String[] args) 
