@@ -12,8 +12,11 @@
 ;(m/use-primitive-operators)
 
 (def size 1024)
-(def num-light-points 4500)
-(def num-dark-points 9000)
+(def num-light-points 2000
+  
+  )
+(def num-dark-points 8000
+  )
 (def h (cljgl_universe.Helper. size num-light-points num-dark-points))
 (.randomizeLightPoints h)
 (.randomizeDarkPoints h)
@@ -22,16 +25,14 @@
 (def p (atom [512 512]))
 
 (defn draw-grid [canvas]
-  (loop [l 16]
-    (when (< l 512)
-      (d/set-color canvas (c/color 0 255 0 l))
-      (d/set-stroke canvas 1.0)
-      (loop [x (d/width canvas)]
-        (when (> x 0.0)
-          (d/line canvas x 0 x 1024)
-          (d/line canvas 0 x 1024 x)
-          (recur (- x l))))
-      (recur (* 4 l)))))
+  (doseq [l [64 256]] 
+    (d/set-color canvas (c/color 0 255 0 l))
+    (d/set-stroke canvas 1.0)
+    (loop [x (d/width canvas)]
+      (when (> x 0.0)
+        (d/line canvas x 0 x 1024)
+        (d/line canvas 0 x 1024 x)
+        (recur (- x l))))))
 
 (defn draw-test-bounds [canvas]
   (d/set-color canvas :red)
@@ -47,11 +48,15 @@
                   (- (* d x-end) (* d x-start))
                   (- (* d y-end) (* d y-start))
                   true))
-          x-bounds y-bounds (iterate #(* 4 %) 4)))))
+          x-bounds y-bounds (iterate #(* 4 %) 16)))))
 
 (defn draw-points [canvas]
-  (.calcLightPoints h)
-  (.calcDarkPoints h)
+  (.indexPoints h)
+  (.calcLightPointsIndex2 h)
+  
+  ;(.calcLightPointsIndex h)
+  (.calcDarkPointsIndex2 h)
+  ;(.calcDarkPoints2 h)
   (.switchBuffers h)
   (let [^floats lx (.getLightPointsX h)
         ^floats ly (.getLightPointsY h)
@@ -67,12 +72,15 @@
 (comment
   (let [draw (fn [canvas window frame state]
                (when (clojure2d.core/mouse-pressed? window)
-                   (reset! p [(d/mouse-x window) (d/mouse-y window)]))
-               (d/set-background canvas 120 120 120 60)
-               (draw-grid canvas)
-               (draw-test-bounds canvas)
-               ;(draw-points canvas)
-               
+                 (.randomizeLightPoints h)
+                 (.randomizeDarkPoints h)
+                 (reset! p [(d/mouse-x window) (d/mouse-y window)]))
+               (d/set-background canvas 120 120 120 28)
+               (draw-points canvas)
+               ;(draw-grid canvas)
+               ;(draw-test-bounds canvas)
+
+               ;(d/save canvas (d/next-filename "results/spin/" ".jpg"))
                )]
     (d/show-window {:canvas (d/canvas size size)
                     :draw-fn draw
