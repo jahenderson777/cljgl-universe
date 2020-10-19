@@ -12,8 +12,9 @@
 ;(m/use-primitive-operators)
 
 (def size 1024)
-(def num-light-points 4500)
-(def num-dark-points 7500)
+(def num-light-points 3700
+  )
+(def num-dark-points 8500)
 
 (def u (cljgl_universe.UniverseEngine. size num-light-points num-dark-points))
 (.randomizeLightPoints u)
@@ -76,7 +77,7 @@
                  (.randomizeLightPoints u)
                  (.randomizeDarkPoints u)
                  (reset! p [(d/mouse-x window) (d/mouse-y window)]))
-               ;(d/set-background canvas 90 90 90 22)
+               ;(d/set-background canvas 86 86 86 18)
                (d/set-background canvas 0 0 0 20)
                (d/set-color canvas :black)
               ; (d/rect canvas 0 0 50 20)
@@ -87,7 +88,7 @@
               ; (d/set-color canvas :green)
                ;(d/text canvas (str (.lastFrameCalcTime u)) 5 14)
 
-               (d/save canvas (d/next-filename "results/colour3/" ".jpg"))
+               (d/save canvas (d/next-filename "results/colour4/" ".jpg"))
                )]
     (d/show-window {:canvas (d/canvas size size)
                     :draw-fn draw

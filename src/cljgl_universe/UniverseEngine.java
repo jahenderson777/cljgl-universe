@@ -91,18 +91,18 @@ public class UniverseEngine {
         float[] lightPointsX = getLightPointsX();
         float[] lightPointsY = getLightPointsY();
 
-        for (int i = 0; i < numLightPoints; i++) {
+        /*for (int i = 0; i < numLightPoints; i++) {
             lightPointsX[i] = ThreadLocalRandom.current().nextFloat() * (float)size;
             lightPointsY[i] = ThreadLocalRandom.current().nextFloat() * (float)size;
-        }
-        /*for (int i = 0; i < numLightPoints/2; i++) {
+        }*/
+        for (int i = 0; i < numLightPoints/2; i++) {
             lightPointsX[i] = (float)size*2/10 + ThreadLocalRandom.current().nextFloat() * (float)size/10;
             lightPointsY[i] = (float)size*2/10 + ThreadLocalRandom.current().nextFloat() * (float)size/10;
         }
         for (int i = numLightPoints/2; i < numLightPoints; i++) {
             lightPointsX[i] = (float)size*7/10 + ThreadLocalRandom.current().nextFloat() * (float)size/10;
             lightPointsY[i] = (float)size*7/10 + ThreadLocalRandom.current().nextFloat() * (float)size/10;
-        }*/
+        }
     }
 
     public void randomizeDarkPoints() {
@@ -240,9 +240,9 @@ public class UniverseEngine {
                             h3 = 1.0f / (h * h * h);
                             thetaMod += h3 /  100.0f;
                             forceTotal += 0.25f / (h * h);
-                            if (h >= 5.5f) { 
-                                ex += 16.0f * dx * h3;
-                                ey += 16.0f * dy * h3;
+                            if (h >= 2.6f) { 
+                                ex += 4.5f * dx * h3;
+                                ey += 4.5f * dy * h3;
                             }
                         }
                     }
@@ -254,7 +254,7 @@ public class UniverseEngine {
 
         float theta = (float)Math.atan2(ey, ex);
         float h2 = (float)Math.sqrt(ex*ex + ey*ey);
-        thetaMod = 10.0f * thetaMod / (1.0f + Math.abs(4.0f * thetaMod));
+        thetaMod = 13.3f * thetaMod / (1.2f + Math.abs(4.0f * thetaMod));
         h2 = 4.0f * h2 / (1.0f + Math.abs(h2));
 
         theta += thetaMod;
@@ -285,8 +285,22 @@ public class UniverseEngine {
                 }  
             }
         }         
-        lightPointsXWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, x + ex));
-        lightPointsYWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, y + ey));     
+        ex += x;
+        ey += y;
+        if (ex > (float)size - 4.0f) {
+            ex = (float)size - 4.0f - ThreadLocalRandom.current().nextFloat() * 8.0f;
+        }
+        if (ex < 4.0f) {
+            ex = 4.0f + ThreadLocalRandom.current().nextFloat() * 8.0f;
+        }
+        if (ey > (float)size - 4.0f) {
+            ey = (float)size - 4.0f - ThreadLocalRandom.current().nextFloat() * 8.0f;
+        }
+        if (ey < 4.0f) {
+            ey = 4.0f + ThreadLocalRandom.current().nextFloat() * 8.0f;
+        }
+        lightPointsXWrite[i] = ex;
+        lightPointsYWrite[i] = ey;     
     }
 
     public void calcDarkPoint(int i) {
@@ -331,13 +345,18 @@ public class UniverseEngine {
             for (jx = 0; jx < size/64; jx++) {
                 if (jy < lby || jy >= hby || jx < lbx || jx >= hbx) {
                     v = darkIndex64[jx + (jy * index64Width)];
-                    dx = (float)(jx * 64) + 16.0f + ThreadLocalRandom.current().nextFloat() * 16.0f - x;
-                    dy = (float)(jy * 64) + 16.0f + ThreadLocalRandom.current().nextFloat() * 16.0f - y;
+                    /*dx = (float)(jx * 64) + 16.0f + ThreadLocalRandom.current().nextFloat() * 16.0f - x;
+                    dy = (float)(jy * 64) + 16.0f + ThreadLocalRandom.current().nextFloat() * 16.0f - y;*/
+                    dx = (float)(jx * 64) + 32.0f - x;
+                    dy = (float)(jy * 64) + 32.0f - y;
                     h = (float)Math.sqrt(dx * dx + dy * dy);
                     h3 = h * h * h;
-                    //v = lightIndex64[jx + (jy * index64Width)];
-                    ex -= (float)v * 35.0f * dx / h3;
-                    ey -= (float)v * 35.0f * dy / h3;
+                    ex -= (float)v * 28.0f * dx / h3;
+                    ey -= (float)v * 28.0f * dy / h3;
+                    v = lightIndex64[jx + (jy * index64Width)];
+                    h3 =  0.2f * h * h * h * h + h*h*h;
+                    ex -= (float)v * 400.0f * dx / h3;
+                    ey -= (float)v * 400.0f * dy / h3;
                 } else {
                     for(Iterator itr = darkIndex64Points[jx + jy*index64Width].iterator(); itr.hasNext();) {	      
                         pidx = (Integer)itr.next();
@@ -347,8 +366,8 @@ public class UniverseEngine {
                             h = (float)Math.sqrt(dx * dx + dy * dy);
                             h3 = h * h * h;
                             if (h < 1.0f) {
-                                ex -= dx;
-                                ey -= dy;
+                                ex -= dx + ThreadLocalRandom.current().nextFloat() - 0.5f;
+                                ey -= dy + ThreadLocalRandom.current().nextFloat() - 0.5f;
                             } else {
                                 ex -= 17.0f * dx / h3;
                                 ey -= 17.0f * dy / h3;
@@ -361,21 +380,34 @@ public class UniverseEngine {
                             dx = lightPointsX[pidx] - x;
                             dy = lightPointsY[pidx] - y;
                             h = (float)Math.sqrt(dx * dx + dy * dy);
-                            h3 = h * h * h * h + h*h*h;
+                            h3 = 0.2f * h * h * h * h + h*h*h;
                             if (h < 1.0f) {
-                                ex -= 200.0f * dx * h3;
-                                ey -= 200.0f * dy * h3;
+                                ex -= 400.0f * dx * h3;
+                                ey -= 400.0f * dy * h3;
                             } else {
-                                ex -= 200.0f * dx / h3;
-                                ey -= 200.0f * dy / h3;
+                                ex -= 400.0f * dx / h3;
+                                ey -= 400.0f * dy / h3;
                             }
                         }
                     }
                 }  
             }
         }  
-        darkPointsXWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, ex));
-        darkPointsYWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, ey));
+
+        if (ex > (float)size - 4.0f) {
+            ex = (float)size - 4.0f - ThreadLocalRandom.current().nextFloat() * 4.0f;
+        }
+        if (ex < 4.0f) {
+            ex = 4.0f + ThreadLocalRandom.current().nextFloat() * 4.0f;
+        }
+        if (ey > (float)size - 4.0f) {
+            ey = (float)size - 4.0f - ThreadLocalRandom.current().nextFloat() * 4.0f;
+        }
+        if (ey < 4.0f) {
+            ey = 4.0f + ThreadLocalRandom.current().nextFloat() * 4.0f;
+        }
+        darkPointsXWrite[i] = ex;
+        darkPointsYWrite[i] = ey;   
     }    
 
     private static float hue2rgb(float p, float q, float h) {
@@ -417,8 +449,8 @@ public class UniverseEngine {
 
     void setLightPointColor(int idx, float forceTotal) {
         float q, p, r, g, b, h, s, l, f2;
-        f2 = 0.4f * forceTotal * forceTotal * forceTotal + 0.1f * forceTotal * forceTotal;
-        h = f2 / (100.0f + f2);
+        f2 = 0.4f * forceTotal * forceTotal * forceTotal;
+        h = 1.28f * f2 / (100.0f + f2);
         s = 1.0f;
         l = 0.65f;   
         if (s == 0) {
