@@ -12,8 +12,8 @@
 ;(m/use-primitive-operators)
 
 (def size 1024)
-(def num-light-points 4000)
-(def num-dark-points 8000)
+(def num-light-points 4500)
+(def num-dark-points 8200)
 
 (def u (cljgl_universe.UniverseEngine. size num-light-points num-dark-points))
 (.randomizeLightPoints u)
@@ -36,8 +36,8 @@
   (d/set-color canvas :red)
   (d/set-stroke canvas 1.0)
   (let [[px py] @p
-        x-bounds (partition 2 (.bounds h px))
-        y-bounds (partition 2 (.bounds h py))]
+        x-bounds (partition 2 (.bounds u px))
+        y-bounds (partition 2 (.bounds u py))]
     (doall
      (map (fn [[x-start x-end] [y-start y-end] d]
             (d/rect canvas
@@ -55,13 +55,21 @@
   (.switchBuffers u)
   (let [^floats lx (.getLightPointsX u)
         ^floats ly (.getLightPointsY u)
+        ^floats lxb (.getLightPointsXb u)
+        ^floats lyb (.getLightPointsYb u)
         ^floats dx (.getDarkPointsX u)
         ^floats dy (.getDarkPointsY u)]
     (dotimes [i num-light-points]
-      (let [^ints col (UniverseEngine/hslColor (/ (aget (.-lightPointsForce u) i) 5000.0) 1.0 0.65)]
-        (d/set-color canvas (aget col 0) (aget col 1) (aget col 2)))
-      (d/rect canvas (aget lx i) (aget ly i) 1 1))
-    (d/set-color canvas :black)
+      (d/set-color canvas
+                   (aget (.-lightPointsRed u) i)
+                   (aget (.-lightPointsGreen u) i)
+                   (aget (.-lightPointsBlue u) i))
+      (d/line canvas 
+              (aget lxb i) (aget lyb i)
+              (aget lx i) (aget ly i))
+      ;(d/rect canvas (aget lx i) (aget ly i) 1 1)
+      )
+    (d/set-color canvas 90 90 90)
     (dotimes [i num-dark-points]
       (d/rect canvas (aget dx i) (aget dy i) 2 2))))
 
@@ -71,12 +79,13 @@
                  (.randomizeLightPoints u)
                  (.randomizeDarkPoints u)
                  (reset! p [(d/mouse-x window) (d/mouse-y window)]))
-               (d/set-background canvas 110 110 110 28)
+               ;(d/set-background canvas 90 90 90 25)
+               (d/set-background canvas 0 0 0 28)
                (draw-points canvas)
                ;(draw-grid canvas)
                ;(draw-test-bounds canvas)
 
-               ;(d/save canvas (d/next-filename "results/colour/" ".jpg"))
+               (d/save canvas (d/next-filename "results/colour/" ".jpg"))
                )]
     (d/show-window {:canvas (d/canvas size size)
                     :draw-fn draw

@@ -15,6 +15,7 @@ public class UniverseEngine {
     public float[] lightPointsXA, darkPointsXA, lightPointsYA, darkPointsYA;
     public float[] lightPointsXB, darkPointsXB, lightPointsYB, darkPointsYB;
     public float[] lightPointsForce;
+    public int[] lightPointsRed, lightPointsGreen, lightPointsBlue;
 
     boolean bufferSwitch = true;
 
@@ -35,6 +36,10 @@ public class UniverseEngine {
         this.lightPointsYB = new float[numLightPoints * 2];
         this.darkPointsXB = new float[numDarkPoints * 2];
         this.darkPointsYB = new float[numDarkPoints * 2];
+
+        this.lightPointsRed = new int[numLightPoints];
+        this.lightPointsGreen = new int[numLightPoints];
+        this.lightPointsBlue = new int[numLightPoints];
 
         this.lightPointsForce = new float[numLightPoints];
 
@@ -63,6 +68,22 @@ public class UniverseEngine {
 
     public float[] getDarkPointsY() {
         return bufferSwitch ? darkPointsYA : darkPointsYB;
+    }
+
+    public float[] getLightPointsXb() {
+        return !bufferSwitch ? lightPointsXA : lightPointsXB;
+    }
+
+    public float[] getLightPointsYb() {
+        return !bufferSwitch ? lightPointsYA : lightPointsYB;
+    }
+
+    public float[] getDarkPointsXb() {
+        return !bufferSwitch ? darkPointsXA : darkPointsXB;
+    }
+
+    public float[] getDarkPointsYb() {
+        return !bufferSwitch ? darkPointsYA : darkPointsYB;
     }
 
     public void randomizeLightPoints() {
@@ -231,7 +252,8 @@ public class UniverseEngine {
                 }
             }
 
-            lightPointsForce[i] = 500.0f * forceTotal / (1.0f + Math.abs(0.01f * forceTotal));;
+            lightPointsForce[i] = 500.0f * forceTotal / (1.0f + Math.abs(0.01f * forceTotal));
+            setLightPointColor(i, forceTotal);
 
             float theta = (float)Math.atan2(ey, ex);
             float h2 = (float)Math.sqrt(ex*ex + ey*ey);
@@ -406,6 +428,28 @@ public class UniverseEngine {
         color[1] = Math.round(g * 255);
         color[2] = Math.round(b * 255);
         return color;
+    }
+
+    void setLightPointColor(int idx, float forceTotal) {
+        float q, p, r, g, b, h, s, l, f2;
+        f2 = 0.3f * forceTotal * forceTotal * forceTotal + 0.1f * forceTotal * forceTotal;
+        //h = forceTotal / 10.0f * (1.0f + Math.abs(0.01f * forceTotal));
+        h = f2 / (100.0f + f2);
+        s = 1.0f;
+        l = 0.65f;
+        
+        if (s == 0) {
+            r = g = b = l; // achromatic
+        } else {
+            q = l < 0.5 ? (l * (1 + s)) : (l + s - l * s);
+            p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1.0f / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1.0f / 3);
+        }
+        lightPointsRed[idx]   = (int)Math.round(r * 255);
+        lightPointsGreen[idx] = (int)Math.round(g * 255);
+        lightPointsBlue[idx]  = (int)Math.round(b * 255);
     }
 
 
