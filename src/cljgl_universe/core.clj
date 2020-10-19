@@ -14,7 +14,7 @@
 (def size 1024)
 (def num-light-points 3700
   )
-(def num-dark-points 8500)
+(def num-dark-points 7800)
 
 (def u (cljgl_universe.UniverseEngine. size num-light-points num-dark-points))
 (.randomizeLightPoints u)

@@ -91,18 +91,18 @@ public class UniverseEngine {
         float[] lightPointsX = getLightPointsX();
         float[] lightPointsY = getLightPointsY();
 
-        /*for (int i = 0; i < numLightPoints; i++) {
+        for (int i = 0; i < numLightPoints; i++) {
             lightPointsX[i] = ThreadLocalRandom.current().nextFloat() * (float)size;
             lightPointsY[i] = ThreadLocalRandom.current().nextFloat() * (float)size;
-        }*/
-        for (int i = 0; i < numLightPoints/2; i++) {
+        }
+        /*for (int i = 0; i < numLightPoints/2; i++) {
             lightPointsX[i] = (float)size*2/10 + ThreadLocalRandom.current().nextFloat() * (float)size/10;
             lightPointsY[i] = (float)size*2/10 + ThreadLocalRandom.current().nextFloat() * (float)size/10;
         }
         for (int i = numLightPoints/2; i < numLightPoints; i++) {
             lightPointsX[i] = (float)size*7/10 + ThreadLocalRandom.current().nextFloat() * (float)size/10;
             lightPointsY[i] = (float)size*7/10 + ThreadLocalRandom.current().nextFloat() * (float)size/10;
-        }
+        }*/
     }
 
     public void randomizeDarkPoints() {
@@ -241,8 +241,8 @@ public class UniverseEngine {
                             thetaMod += h3 /  100.0f;
                             forceTotal += 0.25f / (h * h);
                             if (h >= 2.6f) { 
-                                ex += 4.5f * dx * h3;
-                                ey += 4.5f * dy * h3;
+                                ex += 5.9f * dx * h3;
+                                ey += 5.9f * dy * h3;
                             }
                         }
                     }
@@ -287,17 +287,17 @@ public class UniverseEngine {
         }         
         ex += x;
         ey += y;
-        if (ex > (float)size - 4.0f) {
-            ex = (float)size - 4.0f - ThreadLocalRandom.current().nextFloat() * 8.0f;
+        if (ex > (float)size - 1.0f) {
+            ex = (float)size - 1.0f - ThreadLocalRandom.current().nextFloat() * 8.0f;
         }
-        if (ex < 4.0f) {
-            ex = 4.0f + ThreadLocalRandom.current().nextFloat() * 8.0f;
+        if (ex < 1.0f) {
+            ex = 1.0f + ThreadLocalRandom.current().nextFloat() * 8.0f;
         }
-        if (ey > (float)size - 4.0f) {
-            ey = (float)size - 4.0f - ThreadLocalRandom.current().nextFloat() * 8.0f;
+        if (ey > (float)size - 1.0f) {
+            ey = (float)size - 1.0f - ThreadLocalRandom.current().nextFloat() * 8.0f;
         }
-        if (ey < 4.0f) {
-            ey = 4.0f + ThreadLocalRandom.current().nextFloat() * 8.0f;
+        if (ey < 1.0f) {
+            ey = 1.0f + ThreadLocalRandom.current().nextFloat() * 8.0f;
         }
         lightPointsXWrite[i] = ex;
         lightPointsYWrite[i] = ey;     
@@ -394,17 +394,17 @@ public class UniverseEngine {
             }
         }  
 
-        if (ex > (float)size - 4.0f) {
-            ex = (float)size - 4.0f - ThreadLocalRandom.current().nextFloat() * 4.0f;
+        if (ex > (float)size - 1.0f) {
+            ex = (float)size - 1.0f - ThreadLocalRandom.current().nextFloat() * 4.0f;
         }
-        if (ex < 4.0f) {
-            ex = 4.0f + ThreadLocalRandom.current().nextFloat() * 4.0f;
+        if (ex < 1.0f) {
+            ex = 1.0f + ThreadLocalRandom.current().nextFloat() * 4.0f;
         }
-        if (ey > (float)size - 4.0f) {
-            ey = (float)size - 4.0f - ThreadLocalRandom.current().nextFloat() * 4.0f;
+        if (ey > (float)size - 1.0f) {
+            ey = (float)size - 1.0f - ThreadLocalRandom.current().nextFloat() * 4.0f;
         }
-        if (ey < 4.0f) {
-            ey = 4.0f + ThreadLocalRandom.current().nextFloat() * 4.0f;
+        if (ey < 1.0f) {
+            ey = 1.0f + ThreadLocalRandom.current().nextFloat() * 4.0f;
         }
         darkPointsXWrite[i] = ex;
         darkPointsYWrite[i] = ey;   
