@@ -12,7 +12,7 @@
 ;(m/use-primitive-operators)
 
 (def size 1024)
-(def num-light-points 5000)
+(def num-light-points 4000)
 (def num-dark-points 8000)
 
 (def u (cljgl_universe.UniverseEngine. size num-light-points num-dark-points))
@@ -60,9 +60,7 @@
     (dotimes [i num-light-points]
       (let [^ints col (UniverseEngine/hslColor (/ (aget (.-lightPointsForce u) i) 5000.0) 1.0 0.65)]
         (d/set-color canvas (aget col 0) (aget col 1) (aget col 2)))
-  
-      (d/rect canvas (aget lx i) (aget ly i) 1 1)
-      )
+      (d/rect canvas (aget lx i) (aget ly i) 1 1))
     (d/set-color canvas :black)
     (dotimes [i num-dark-points]
       (d/rect canvas (aget dx i) (aget dy i) 2 2))))
@@ -78,7 +76,7 @@
                ;(draw-grid canvas)
                ;(draw-test-bounds canvas)
 
-               ;(d/save canvas (d/next-filename "results/spin/" ".jpg"))
+               ;(d/save canvas (d/next-filename "results/colour/" ".jpg"))
                )]
     (d/show-window {:canvas (d/canvas size size)
                     :draw-fn draw

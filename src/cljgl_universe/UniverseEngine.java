@@ -39,7 +39,7 @@ public class UniverseEngine {
         this.lightPointsForce = new float[numLightPoints];
 
         index64Width = size / 64;
-        index64Size = (size/64) * (size/64);
+        index64Size = index64Width * index64Width;
 
         lightIndex64Points = (Deque<Integer>[])new ArrayDeque[index64Size];
         darkIndex64Points = (Deque<Integer>[])new ArrayDeque[index64Size];
@@ -136,7 +136,7 @@ public class UniverseEngine {
         x2 = x - d;
         m = x2 % divisor;
         z = x2 / divisor;
-        
+
         if (m < divisor / 4) {
             z--;
         } 
@@ -161,7 +161,7 @@ public class UniverseEngine {
         m = x2 % divisor;
         z = 1 + (x2 / divisor);
 
-       if (m >= 3 * divisor / 4) {
+        if (m >= 3 * divisor / 4) {
             z++;
         }
         if (z < 0) {
@@ -191,7 +191,6 @@ public class UniverseEngine {
             y = lightPointsY[i];
             ex = 0.0f;
             ey = 0.0f;
-
             ix = (int)x;
             iy = (int)y;
             lbx = lowerBound(ix, 64);
@@ -266,8 +265,7 @@ public class UniverseEngine {
                         }
                     }  
                 }
-            }
-            
+            }         
             lightPointsXWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, x + ex));
             lightPointsYWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, y + ey));
         }
@@ -366,8 +364,7 @@ public class UniverseEngine {
                         }
                     }  
                 }
-            }
-            
+            }  
             darkPointsXWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, ex));
             darkPointsYWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, ey));
         }
@@ -377,23 +374,18 @@ public class UniverseEngine {
         if (h < 0) {
             h += 1;
         }
-    
         if (h > 1) {
             h -= 1;
         }
-    
         if (6 * h < 1) {
             return p + ((q - p) * 6 * h);
         }
-    
         if (2 * h < 1) {
             return q;
         }
-    
         if (3 * h < 2) {
             return p + ((q - p) * 6 * ((2.0f / 3.0f) - h));
         }
-    
         return p;
     }
 
@@ -415,8 +407,6 @@ public class UniverseEngine {
         color[2] = Math.round(b * 255);
         return color;
     }
-
-
 
 
     public static void main(String[] args) 
