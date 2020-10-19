@@ -2,6 +2,7 @@ package cljgl_universe;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
 
 public class UniverseEngine {
     public int[] lightIndex64;
@@ -14,10 +15,12 @@ public class UniverseEngine {
 
     public float[] lightPointsXA, darkPointsXA, lightPointsYA, darkPointsYA;
     public float[] lightPointsXB, darkPointsXB, lightPointsYB, darkPointsYB;
-    public float[] lightPointsForce;
     public int[] lightPointsRed, lightPointsGreen, lightPointsBlue;
 
     boolean bufferSwitch = true;
+
+    public long frameNum = 0;
+    public long lastFrameCalcTime;
 
     public UniverseEngine(int size, int numLightPoints, int numDarkPoints) {
         this.size = size;
@@ -40,8 +43,6 @@ public class UniverseEngine {
         this.lightPointsRed = new int[numLightPoints];
         this.lightPointsGreen = new int[numLightPoints];
         this.lightPointsBlue = new int[numLightPoints];
-
-        this.lightPointsForce = new float[numLightPoints];
 
         index64Width = size / 64;
         index64Size = index64Width * index64Width;
@@ -128,8 +129,6 @@ public class UniverseEngine {
         Arrays.fill(lightIndex64, 0);
         Arrays.fill(darkIndex64, 0);
 
-        Arrays.fill(lightPointsForce, 0.0f);
-
         for (int i = 0; i < numLightPoints; i++) {
             int i64 = ((int)lightPointsX[i] / 64) + (((int)lightPointsY[i] / 64) * index64Width);
             lightIndex64[i64] += 1;
@@ -195,7 +194,7 @@ public class UniverseEngine {
     }
 
 
-    public void calcLightPoints() {
+    public void calcLightPoint(int i) {
         float[] lightPointsX = getLightPointsX();
         float[] lightPointsY = getLightPointsY();
         float[] darkPointsX = getDarkPointsX();
@@ -205,95 +204,92 @@ public class UniverseEngine {
         float[] lightPointsYWrite = bufferSwitch ? lightPointsYB : lightPointsYA;
 
         float x, y, dx = 0.0f, dy = 0.0f, h, h3, ex, ey, thetaMod = 0.0f, forceTotal;
-        int i, jx, jy, ix, iy, lbx, lby, hbx, hby, pidx, v;
+        int jx, jy, ix, iy, lbx, lby, hbx, hby, pidx, v;
 
-        for (i = 0; i < numLightPoints; i++) {
-            x = lightPointsX[i];
-            y = lightPointsY[i];
-            ex = 0.0f;
-            ey = 0.0f;
-            ix = (int)x;
-            iy = (int)y;
-            lbx = lowerBound(ix, 64);
-            hbx = higherBound(ix, 64);
-            lby = lowerBound(iy, 64);
-            hby = higherBound(iy, 64);
-            thetaMod = 0.0f;
-            forceTotal = 0.0f;
+        x = lightPointsX[i];
+        y = lightPointsY[i];
+        ex = 0.0f;
+        ey = 0.0f;
+        ix = (int)x;
+        iy = (int)y;
+        lbx = lowerBound(ix, 64);
+        hbx = higherBound(ix, 64);
+        lby = lowerBound(iy, 64);
+        hby = higherBound(iy, 64);
+        thetaMod = 0.0f;
+        forceTotal = 0.0f;
 
-            for (jy = 0; jy < size/64; jy++) {
-                for (jx = 0; jx < size/64; jx++) {
-                    if (jy < lby || jy >= hby || jx < lbx || jx >= hbx) {
-                        v = lightIndex64[jx + (jy * index64Width)];
-                        dx = (float)(jx * 64) + 32.0f - x;
-                        dy = (float)(jy * 64) + 32.0f - y;
-                        h = (float)Math.sqrt(dx * dx + dy * dy);
-                        h3 = h * h * h;
-                        ex += (float)v * 10.0f * dx / h3;
-                        ey += (float)v * 10.0f * dy / h3;
-                    } else {
-                        for(Iterator itr = lightIndex64Points[jx + jy*index64Width].iterator(); itr.hasNext();) {	      
-                            pidx = (Integer)itr.next();
-                            if (pidx != i) {
-                                dx = lightPointsX[pidx] - x;
-                                dy = lightPointsY[pidx] - y;
-                                h = (float)Math.sqrt(dx * dx + dy * dy);
-                                if (h < 1.0f) h = 1.0f;
-                                h3 = 1.0f / (h * h * h);
-                                thetaMod += h3 /  100.0f;
-                                forceTotal += 0.25f / (h * h);
-                                if (h >= 5.0f) { 
-                                    ex += 20.0f * dx * h3;
-                                    ey += 20.0f * dy * h3;
-                                }
+        for (jy = 0; jy < size/64; jy++) {
+            for (jx = 0; jx < size/64; jx++) {
+                if (jy < lby || jy >= hby || jx < lbx || jx >= hbx) {
+                    /*v = lightIndex64[jx + (jy * index64Width)];
+                    dx = (float)(jx * 64) + 32.0f - x;
+                    dy = (float)(jy * 64) + 32.0f - y;
+                    h = (float)Math.sqrt(dx * dx + dy * dy);
+                    h3 = h * h * h;
+                    ex += (float)v * 10.0f * dx / h3;
+                    ey += (float)v * 10.0f * dy / h3;*/
+                } else {
+                    for(Iterator itr = lightIndex64Points[jx + jy*index64Width].iterator(); itr.hasNext();) {	      
+                        pidx = (Integer)itr.next();
+                        if (pidx != i) {
+                            dx = lightPointsX[pidx] - x;
+                            dy = lightPointsY[pidx] - y;
+                            h = (float)Math.sqrt(dx * dx + dy * dy);
+                            if (h < 1.0f) h = 1.0f;
+                            h3 = 1.0f / (h * h * h);
+                            thetaMod += h3 /  100.0f;
+                            forceTotal += 0.25f / (h * h);
+                            if (h >= 5.5f) { 
+                                ex += 16.0f * dx * h3;
+                                ey += 16.0f * dy * h3;
                             }
                         }
-                    }  
-                }
+                    }
+                }  
             }
+        }
 
-            lightPointsForce[i] = 500.0f * forceTotal / (1.0f + Math.abs(0.01f * forceTotal));
-            setLightPointColor(i, forceTotal);
+        setLightPointColor(i, forceTotal);
 
-            float theta = (float)Math.atan2(ey, ex);
-            float h2 = (float)Math.sqrt(ex*ex + ey*ey);
-            thetaMod = 12.0f * thetaMod / (1.0f + Math.abs(4.0f * thetaMod));
-            h2 = 4.0f * h2 / (1.0f + Math.abs(h2));
+        float theta = (float)Math.atan2(ey, ex);
+        float h2 = (float)Math.sqrt(ex*ex + ey*ey);
+        thetaMod = 10.0f * thetaMod / (1.0f + Math.abs(4.0f * thetaMod));
+        h2 = 4.0f * h2 / (1.0f + Math.abs(h2));
 
-            theta += thetaMod;
-            ey = (float)Math.sin(theta) * h2;
-            ex = (float)Math.cos(theta) * h2;
+        theta += thetaMod;
+        ey = (float)Math.sin(theta) * h2;
+        ex = (float)Math.cos(theta) * h2;
 
-            for (jy = 0; jy < size/64; jy++) {
-                for (jx = 0; jx < size/64; jx++) {
-                    if (jy < lby || jy >= hby || jx < lbx || jx >= hbx) {
-                    } else {
-                        for(Iterator itr = darkIndex64Points[jx + jy*index64Width].iterator(); itr.hasNext();) {	      
-                            pidx = (Integer)itr.next();
-                            if (pidx != i) {
-                                dx = darkPointsX[pidx] - x;
-                                dy = darkPointsY[pidx] - y;
-                                h = (float)Math.sqrt(dx * dx + dy * dy);
-                                if (h > 120.0f) continue;
-                                h3 = h * h * h;
-                                if (h < 4.0f) {
-                                    ex += dx / 5.0f;
-                                    ey += dy / 5.0f;
-                                } else {
-                                    ex += 63.0f * dx / h3;
-                                    ey += 63.0f * dy / h3;
-                                }
+        for (jy = 0; jy < size/64; jy++) {
+            for (jx = 0; jx < size/64; jx++) {
+                if (jy < lby || jy >= hby || jx < lbx || jx >= hbx) {
+                } else {
+                    for(Iterator itr = darkIndex64Points[jx + jy*index64Width].iterator(); itr.hasNext();) {	      
+                        pidx = (Integer)itr.next();
+                        if (pidx != i) {
+                            dx = darkPointsX[pidx] - x;
+                            dy = darkPointsY[pidx] - y;
+                            h = (float)Math.sqrt(dx * dx + dy * dy);
+                            if (h > 140.0f) continue;
+                            h3 = h * h * h;
+                            if (h < 4.0f) {
+                                ex += dx / 5.0f;
+                                ey += dy / 5.0f;
+                            } else {
+                                ex += 73.0f * dx / h3;
+                                ey += 73.0f * dy / h3;
                             }
                         }
-                    }  
-                }
-            }         
-            lightPointsXWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, x + ex));
-            lightPointsYWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, y + ey));
-        }
+                    }
+                }  
+            }
+        }         
+        lightPointsXWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, x + ex));
+        lightPointsYWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, y + ey));     
     }
 
-    public void calcDarkPoints() {
+    public void calcDarkPoint(int i) {
         float[] lightPointsX = getLightPointsX();
         float[] lightPointsY = getLightPointsY();
         float[] darkPointsX = getDarkPointsX();
@@ -303,93 +299,83 @@ public class UniverseEngine {
         float[] darkPointsYWrite = bufferSwitch ? darkPointsYB : darkPointsYA;
 
         float x, y, dx = 0.0f, dy = 0.0f, h, h3, ex, ey, cx, cy;
-        int i, jx, jy, ix, iy, lbx, lby, hbx, hby, pidx, v;
+        int jx, jy, ix, iy, lbx, lby, hbx, hby, pidx, v;
 
-        for (i = 0; i < numDarkPoints; i++) {
-            x = darkPointsX[i];
-            y = darkPointsY[i];
-            ex = x;
-            ey = y;
-            cx = (x - (float)(size / 2)) / 290.0f;
-            cy = (y - (float)(size / 2)) / 290.0f;
-            if (cx > 0) {
-                ex = x - cx*cx; 
-            }
-            if (cy > 0) {
-                ey = y - cy*cy; 
-            }
-            if (cx < 0) {
-                ex = x + cx*cx; 
-            }
-            if (cy < 0) {
-                ey = y + cy*cy; 
-            }
-
-            ix = (int)x;
-            iy = (int)y;
-            lbx = lowerBound(ix, 64);
-            hbx = higherBound(ix, 64);
-            lby = lowerBound(iy, 64);
-            hby = higherBound(iy, 64);
-
-            for (jy = 0; jy < size/64; jy++) {
-                for (jx = 0; jx < size/64; jx++) {
-                    if (jy < lby || jy >= hby || jx < lbx || jx >= hbx) {
-                        v = darkIndex64[jx + (jy * index64Width)];
-                        dx = (float)(jx * 64) + 32.0f - x;
-                        dy = (float)(jy * 64) + 32.0f - y;
-                        h = (float)Math.sqrt(dx * dx + dy * dy);
-                        h3 = h * h * h;
-                        ex -= (float)v * 35.0f * dx / h3;
-                        ey -= (float)v * 35.0f * dy / h3;
-
-                        v = lightIndex64[jx + (jy * index64Width)];
-                        if (h < 1.0f) {
-                            ex -= (float)v * 32.0f * dx * h3;
-                            ey -= (float)v * 32.0f * dy * h3;
-                        } else {
-                            ex -= (float)v * 35.0f * dx / h3;
-                            ey -= (float)v * 35.0f * dy / h3;
-                        }
-                    } else {
-                        for(Iterator itr = darkIndex64Points[jx + jy*index64Width].iterator(); itr.hasNext();) {	      
-                            pidx = (Integer)itr.next();
-                            if (pidx != i) {
-                                dx = darkPointsX[pidx] - x;
-                                dy = darkPointsY[pidx] - y;
-                                h = (float)Math.sqrt(dx * dx + dy * dy);
-                                h3 = h * h * h;
-                                if (h < 1.0f) {
-                                    ex -= dx;
-                                    ey -= dy;
-                                } else {
-                                    ex -= 35.0f * dx / h3;
-                                    ey -= 35.0f * dy / h3;
-                                }
-                            }
-                        }
-                        for(Iterator itr = lightIndex64Points[jx + jy*index64Width].iterator(); itr.hasNext();) {	      
-                            pidx = (Integer)itr.next();
-                            if (pidx != i) {
-                                dx = lightPointsX[pidx] - x;
-                                dy = lightPointsY[pidx] - y;
-                                h = (float)Math.sqrt(dx * dx + dy * dy);
-                                h3 = h * h * h;
-                                if (h < 1.0f) {
-                                    ex -= 32.0f * dx * h3;
-                                    ey -= 32.0f * dy * h3;
-                                } else {
-                                    ex -= 35.0f * dx / h3;
-                                    ey -= 35.0f * dy / h3;
-                                }
-                            }
-                        }
-                    }  
-                }
-            }  
-            darkPointsXWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, ex));
-            darkPointsYWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, ey));
+        x = darkPointsX[i];
+        y = darkPointsY[i];
+        ex = x;
+        ey = y;
+        cx = (x - (float)(size / 2)) / 390.0f;
+        cy = (y - (float)(size / 2)) / 390.0f;
+        if (cx > 0) {
+            ex = x - cx*cx; 
         }
+        if (cy > 0) {
+            ey = y - cy*cy; 
+        }
+        if (cx < 0) {
+            ex = x + cx*cx; 
+        }
+        if (cy < 0) {
+            ey = y + cy*cy; 
+        }
+
+        ix = (int)x;
+        iy = (int)y;
+        lbx = lowerBound(ix, 64);
+        hbx = higherBound(ix, 64);
+        lby = lowerBound(iy, 64);
+        hby = higherBound(iy, 64);
+
+        for (jy = 0; jy < size/64; jy++) {
+            for (jx = 0; jx < size/64; jx++) {
+                if (jy < lby || jy >= hby || jx < lbx || jx >= hbx) {
+                    v = darkIndex64[jx + (jy * index64Width)];
+                    dx = (float)(jx * 64) + 16.0f + ThreadLocalRandom.current().nextFloat() * 16.0f - x;
+                    dy = (float)(jy * 64) + 16.0f + ThreadLocalRandom.current().nextFloat() * 16.0f - y;
+                    h = (float)Math.sqrt(dx * dx + dy * dy);
+                    h3 = h * h * h;
+                    //v = lightIndex64[jx + (jy * index64Width)];
+                    ex -= (float)v * 35.0f * dx / h3;
+                    ey -= (float)v * 35.0f * dy / h3;
+                } else {
+                    for(Iterator itr = darkIndex64Points[jx + jy*index64Width].iterator(); itr.hasNext();) {	      
+                        pidx = (Integer)itr.next();
+                        if (pidx != i) {
+                            dx = darkPointsX[pidx] - x;
+                            dy = darkPointsY[pidx] - y;
+                            h = (float)Math.sqrt(dx * dx + dy * dy);
+                            h3 = h * h * h;
+                            if (h < 1.0f) {
+                                ex -= dx;
+                                ey -= dy;
+                            } else {
+                                ex -= 17.0f * dx / h3;
+                                ey -= 17.0f * dy / h3;
+                            }
+                        }
+                    }
+                    for(Iterator itr = lightIndex64Points[jx + jy*index64Width].iterator(); itr.hasNext();) {	      
+                        pidx = (Integer)itr.next();
+                        if (pidx != i) {
+                            dx = lightPointsX[pidx] - x;
+                            dy = lightPointsY[pidx] - y;
+                            h = (float)Math.sqrt(dx * dx + dy * dy);
+                            h3 = h * h * h * h + h*h*h;
+                            if (h < 1.0f) {
+                                ex -= 200.0f * dx * h3;
+                                ey -= 200.0f * dy * h3;
+                            } else {
+                                ex -= 200.0f * dx / h3;
+                                ey -= 200.0f * dy / h3;
+                            }
+                        }
+                    }
+                }  
+            }
+        }  
+        darkPointsXWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, ex));
+        darkPointsYWrite[i] = Math.max(14.0f, Math.min((float)size - 14.0f, ey));
     }    
 
     private static float hue2rgb(float p, float q, float h) {
@@ -414,7 +400,6 @@ public class UniverseEngine {
     static public int[] hslColor(float h, float s, float l) {
         float q, p, r, g, b;
         int[] color = new int[3];
-        
         if (s == 0) {
             r = g = b = l; // achromatic
         } else {
@@ -432,12 +417,10 @@ public class UniverseEngine {
 
     void setLightPointColor(int idx, float forceTotal) {
         float q, p, r, g, b, h, s, l, f2;
-        f2 = 0.3f * forceTotal * forceTotal * forceTotal + 0.1f * forceTotal * forceTotal;
-        //h = forceTotal / 10.0f * (1.0f + Math.abs(0.01f * forceTotal));
+        f2 = 0.4f * forceTotal * forceTotal * forceTotal + 0.1f * forceTotal * forceTotal;
         h = f2 / (100.0f + f2);
         s = 1.0f;
-        l = 0.65f;
-        
+        l = 0.65f;   
         if (s == 0) {
             r = g = b = l; // achromatic
         } else {
@@ -452,9 +435,41 @@ public class UniverseEngine {
         lightPointsBlue[idx]  = (int)Math.round(b * 255);
     }
 
+    public void calc() {
+        final long startTime = System.currentTimeMillis();
+        indexPoints();
+        
+        IntStream lights = IntStream.range(0, numLightPoints);
+        lights.parallel().forEach(i -> { 
+            calcLightPoint(i);
+        });
+
+        IntStream darks = IntStream.range(0, numDarkPoints);
+        darks.parallel().forEach(i -> { 
+            calcDarkPoint(i);
+        });
+
+        switchBuffers();
+        frameNum++;
+        lastFrameCalcTime = System.currentTimeMillis() - startTime;
+    }
+
 
     public static void main(String[] args) 
     {   
-        System.out.println("test"); 
+        System.out.println("Normal...");
+
+        IntStream range = IntStream.rangeClosed(1, 10);
+        range.forEach(x -> {
+            System.out.println("Thread : " + Thread.currentThread().getName() + ", value: " + x);
+        });
+
+        System.out.println("Parallel...");
+
+        IntStream range2 = IntStream.rangeClosed(1, 10);
+        range2.parallel().forEach(x -> {
+            System.out.println("Thread : " + Thread.currentThread().getName() + ", value: " + x);
+        });
+
     } 
 }

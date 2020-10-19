@@ -13,7 +13,7 @@
 
 (def size 1024)
 (def num-light-points 4500)
-(def num-dark-points 8200)
+(def num-dark-points 7500)
 
 (def u (cljgl_universe.UniverseEngine. size num-light-points num-dark-points))
 (.randomizeLightPoints u)
@@ -49,10 +49,7 @@
           x-bounds y-bounds (iterate #(* 4 %) 16)))))
 
 (defn draw-points [canvas]
-  (.indexPoints u)
-  (.calcLightPoints u)
-  (.calcDarkPoints u)
-  (.switchBuffers u)
+  (.calc u)
   (let [^floats lx (.getLightPointsX u)
         ^floats ly (.getLightPointsY u)
         ^floats lxb (.getLightPointsXb u)
@@ -79,17 +76,22 @@
                  (.randomizeLightPoints u)
                  (.randomizeDarkPoints u)
                  (reset! p [(d/mouse-x window) (d/mouse-y window)]))
-               ;(d/set-background canvas 90 90 90 25)
-               (d/set-background canvas 0 0 0 28)
+               ;(d/set-background canvas 90 90 90 22)
+               (d/set-background canvas 0 0 0 20)
+               (d/set-color canvas :black)
+              ; (d/rect canvas 0 0 50 20)
                (draw-points canvas)
                ;(draw-grid canvas)
                ;(draw-test-bounds canvas)
+               
+              ; (d/set-color canvas :green)
+               ;(d/text canvas (str (.lastFrameCalcTime u)) 5 14)
 
-               (d/save canvas (d/next-filename "results/colour/" ".jpg"))
+               (d/save canvas (d/next-filename "results/colour3/" ".jpg"))
                )]
     (d/show-window {:canvas (d/canvas size size)
                     :draw-fn draw
                     :setup (fn [canvas _]
-                             (d/set-background canvas :white)
+                             (d/set-background canvas :black)
                              nil)}))
   )
