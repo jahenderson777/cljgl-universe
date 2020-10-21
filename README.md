@@ -1,3 +1,6 @@
+![Header image](/images/headme-header.png)
+Format: ![Alt Text](url)
+
 # A state-machine model of the universe operating on a set of discrete space points and energy points in an E3 meta-space.
 
 ### An attempt to model physics by spatially treating non-dimensionality in an E3 meta-space
