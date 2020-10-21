@@ -1,5 +1,4 @@
-![Header image](/images/headme-header.png)
-Format: ![Alt Text](url)
+![header image](https://github.com/jahenderson777/cljgl-universe/blob/master/images/header-image.png?raw=true)
 
 # A state-machine model of the universe operating on a set of discrete space points and energy points in an E3 meta-space.
 
