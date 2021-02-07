@@ -66,3 +66,7 @@ The light points are energy. In meta-space energy is the embedded space describe
 So I’ve been thinking about this a bit more, and I think that somehow each dark and light point probably needs to have an axis. I’m not exactly sure why, but it needs to happen because photons must be more like spiral galaxies rather than spherical star-clusters. And also if dark points had an axis this would better match the electromagnetic wave nature of energy. What this means is for the rules is not that different, “light points attract” means light points not just attract towards the position of neighbouring points but also attract towards the axis of neighbouring points (i.e. the axis of each light point changes to match the average axis of neighbouring points). “Dark points repel” also means that the axis of dark points moves away from the axis of neighbouring points.
 
 Maybe the reason the points have an axis is that they can be thought of being composed of a pair of points separated by an infinitesimal distance. 
+
+# Update 7/02/2021
+
+It's become clear recently that in order to model photons like this, they should not travel in straight lines but rather spirals, and they should be constantly accelerating, rather than travelling at a constant speed. So that if you have a photon emitted from a single oscillation of a vertical dipole (in the Y axis) it spirals outwards (in the X plane) with an acceleration such that in any Y plane the photon would appear to phase in and out of existence. 
